@@ -304,7 +304,7 @@ function createSubtask() {
         let newSubtask = new Subtask(subtaskText)
         subtaskTemp.push(newSubtask);
         inputSubtask.value = '';
-        renderSubtasks()
+        renderSubtasks();
     }
 }
 /**
