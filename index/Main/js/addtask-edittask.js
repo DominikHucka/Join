@@ -30,14 +30,14 @@ function checkUser(AssignedUsers, JoinUsers) {
 }
 /**
  * Checks and displays the assigned workers for the specified task in the containerShortName element.
- * @param {object} task - The task object.
  */
-function checkWorker(task) {
+function checkWorker() {
     let containerShortName = document.getElementById('containerShortName');
     containerShortName.innerHTML = '';
-    for (let i = 0; i < task.worker.length; i++) {
-        let assignedWorker = task.worker[i];
-        containerShortName.innerHTML += assignedWorker.accountTag(i);
+    let filtertAccounts = Join.accounts.filter(user => user.checked === true);
+    for (let i = 0; i < filtertAccounts.length; i++) {
+        let assignedWorker = filtertAccounts[i];
+        containerShortName.innerHTML += assignedWorker.accountTag();
     }
 }
 /**
@@ -97,7 +97,6 @@ function taskPrioEventlistener(urgent, medium, low) {
  * Changes CSS attributes for various elements to adjust their styling.
  */
 function changeCSSAttribute() {
-    let createTask = document.getElementById('createNewSubtask');
     document.getElementById('selectContacts').classList.add('w-29');
     document.getElementById('hiddenSubtask').classList.add('w-29');
     document.getElementById('prioCategoryContainer').classList.add('w-29');
@@ -108,25 +107,6 @@ function changeCSSAttribute() {
     document.getElementById('closeContacts').style.position = 'relative';
     document.getElementById('assignedToContacts').style.padding = '0';
     document.getElementById('assignedToBottom').classList.add('w-29');
-    mediaQueryCss(createTask);
-}
-/**
- * Applies CSS changes based on media query conditions.
- * @param {object} createTask - The create task element.
- */
-function mediaQueryCss(createTask) {
-    createTask.style.position = 'relative';
-    createTask.style.width = '94%';
-    let createNewSubtask = document.querySelector('.create-subtask ul');
-    if (createNewSubtask) {
-        createNewSubtask.style.width = '100%';
-    }
-
-    let mq = window.matchMedia("(max-width: 520px)");
-    if (mq.matches) {
-        createNewSubtask.style.width = '100%';
-        createTask.style.width = '100%';
-    }
 }
 /**
  * Updates the display for unchecked accounts and sets the 'checked' property to false.
@@ -136,8 +116,8 @@ function assignedCheck(x) {
     document.getElementById(`tinyAccountCardCheckedNone${x}`).classList.remove('d-none');
     document.getElementById(`tinyAccountCardChecked${x}`).classList.add('d-none');
     Join.accounts[x].checked = false;
-    console.log('Boolean is', Join.accounts[x].checked);
-    renderTaskContacts()
+    renderTaskContacts();
+    checkWorker();
 }
 /**
  * Updates the display for checked accounts and sets the 'checked' property to true.
@@ -147,8 +127,8 @@ function assignedCheckNone(x) {
     document.getElementById(`tinyAccountCardCheckedNone${x}`).classList.add('d-none');
     document.getElementById(`tinyAccountCardChecked${x}`).classList.remove('d-none');
     Join.accounts[x].checked = true;
-    console.log('Boolean is', Join.accounts[x].checked);
-    renderTaskContacts()
+    renderTaskContacts();
+    checkWorker()
 }
 /**
  * Updates the display for checked accounts without modifying the 'checked' property.
@@ -172,6 +152,7 @@ function addNewContact() {
  */
 function addShortNames(name, x) {
     renderShortNames(name, x);
+    assignedCheckNone(x);
 }
 /**
  * Renders short names in the specified container for the given name and index.
@@ -181,19 +162,6 @@ function addShortNames(name, x) {
 function renderShortNames(name, x) {
     let container = document.getElementById('containerShortName');
     container.innerHTML += JoinBoard.generateHTMLRenderShortNames(name, x);
-}
-/**
- * Removes short names based on the specified index.
- * @param {number} x - The index associated with the short names to be removed.
- */
-function removeShortNames(x) {
-    let removeName = document.getElementById(`editShortNames${x}`);
-    let removeShortNames = document.getElementById(`removeShortName${x}`);
-    if (removeName) {
-        removeName.remove();
-    } else {
-        removeShortNames.remove();
-    }
 }
 /**
  * Filters contact names based on the search input and updates the displayed contact list.
@@ -212,4 +180,45 @@ function filterContactNames() {
             list.innerHTML += Join.accounts[p].tinyCardCheck(p);
         }
     }
+}
+/**
+ * Enables editing for a subtask with the specified index and updates subtaskTemp on Enter key press.
+ * 
+ * @param {number} m - The index of the subtask to be edited.
+ */
+function editSubtask(m) {
+    let editableTask = document.getElementById(`todoSubtask${m}`)
+    editableTask.setAttribute('contenteditable', true)
+    editableTask.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+            if (editableTask.value != "")
+                subtaskTemp[m] = editableTask.textContent;
+            editableTask.setAttribute('contenteditable', false)
+            renderSubtasks()
+        }
+    })
+}
+/**
+ * Renders contacts for tasks by updating the HTML content of 'contactsList' based on Join.accounts.
+ */
+function renderContactsTasks() {
+    let contactsList = document.getElementById('contactsList')
+    for (let i = 0; i < Join.accounts.length; i++) {
+        let account = Join.accounts[i];
+        contactsList.innerHTML += account.tinyCard(i)
+    }
+}
+/**
+ * Opens a task by updating the content and visibility of the 'addTask' element with the task card for the specified index.
+ * 
+ * @param {number} x - The index of the task to be opened.
+ */
+function openTask(x) {
+    if (isMoving) {
+        return;
+    }
+    let task = Join.tasks[x];
+    let addTask = document.getElementById("addTask");
+    addTask.classList.remove("d-none")
+    addTask.innerHTML = task.taskCardNormal(x);
 }

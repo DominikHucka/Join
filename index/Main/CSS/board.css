@@ -147,7 +147,10 @@ input[type="search"]::-webkit-search-results-decoration {
 /********************************* ACTION BAR *************************************/
 
 .content-add-task {
+    display: flex;
     padding-top: 90px;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .frame-136 {
@@ -269,5 +272,4 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .drag-area {
     min-height: 300px;
-    overflow-x: auto;
 }

@@ -13,6 +13,19 @@ class Task {
         this.feedback = feedback;
         this.done = done;
     }
+
+    setCategoryColor() {
+        let html = "";
+        if (this.Category === 'Technical Task') {
+            html = /*html*/ `<div class="tiny-task-category color-technical">${this.Category}</div>`
+        } else {
+            html = /*html*/ `<div class="tiny-task-category color-userStory">${this.Category}</div>`
+        }
+
+        return html;
+    };
+
+
     taskCardNormal(x) {
         let formatedDate = () => {
             let date = this.date;
@@ -83,13 +96,11 @@ class Task {
             }
             return htmlSnippet;
         }
-
-
         return /*html*/ `
         <div class="bg-task">
             <div id="taskCard" class="taskCard">
                 <div class="taskCardHeader">
-                    <div class="category-color">${this.Category}</div>
+            	    ${this.setCategoryColor()}
                     <div onclick="closeTaskCard()">
                         <svg class="style-closebutton" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <mask id="mask0_87491_5574" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
@@ -137,6 +148,12 @@ class Task {
         `
     }
     taskCardEdit(x) {
+        let getDate = ()=>{
+            let date = new Date()
+            let formattedDate = date.toISOString().split('T')[0];
+            return formattedDate
+        }
+
         return /*html*/ `  
         <div class="editTaskCard">   
             <div class="taskCardHeader" >
@@ -161,7 +178,7 @@ class Task {
                     <textarea class="blue textarea-resize" cols="30" rows="10" id="taskCardEDesc">${this.desc}</textarea>
 
                     <label for="taskCardEDate">Date Due:</label>
-                    <input type="date" id="taskCardEDate" value="${this.date}">
+                    <input type="date" min="${getDate()}" id="taskCardEDate">
 
                     ${JoinBoard.generateHTMLAssignedTo(x)}
                     ${JoinBoard.generateHTMLAddContactShortName(x)}
@@ -180,13 +197,13 @@ class Task {
     }
     tinyTaskCard(x = 0) {
 
+
         let contactTags = () => {
             let rendertContacts = "";
 
             for (let i = 0; i < this.worker.length; i++) {
                 let worker = this.worker[i];
                 rendertContacts += worker.accountTag();
-
             }
             return rendertContacts;
         }
@@ -230,30 +247,26 @@ class Task {
         }
 
         return /*html*/ `
-            <div id="tinyTaskCard${x}" onclick="openTask(${x})" class="tinyTaskCard" draggable="true"  ondragstart="startDragging(${x})">
-
-                <div class="tiny-task-category">${this.Category}</div>
-
+            <div id="tinyTaskCard${x}" onclick="openTask(${x})" class="tinyTaskCard" draggable="true"  ondragstart="startDragging(${x})"  ontouchstart="startTouching('toDo', ${x}, event);" ontouchmove="moveTouching(event);" ontouchend="endTouching(event);" >
+            	${this.setCategoryColor()}
                 <div class="tiny-title">
                     <h1>${this.title}</h1>
                     <span class="tinyTaskCardDescription">${this.desc.substring(0, 50)}</span>
                 </div>
                 ${subtaskArea()}
-
                 <div class="contactsAndPrio">
-                    <div class="tinyTaskCardContacts">${contactTags()}</div>
+                    <div id="tinyCardShortNames" class="tinyTaskCardContacts">${contactTags()}</div>
                     <img src="${prioTag()}" class="prioIcon" alt="">
                 </div>
             </div>
-
         `
-
     }
+
     updateProgressBar(x) {
         let progressContainer = document.getElementById(`tinyTaskCardSubtaskSection${x}`)
         if (progressContainer) {
             let gesamtFortschritt;
-            let variable1 = this.subTasks.length; 
+            let variable1 = this.subTasks.length;
             let variable2 = () => {
                 let countDone = 0;
                 for (let i = 0; i < this.subTasks.length; i++) {
@@ -264,7 +277,6 @@ class Task {
                 }
                 return countDone;
             }
-            console.log("Taskbar update");
             if (variable1 == 0) {
                 progressContainer.classList.add('d-none')
                 variable1 = null
@@ -274,8 +286,6 @@ class Task {
                 let progressbar = document.getElementById(`progressBar${x}`);
                 progressbar.style.width = `${gesamtFortschritt}%`;
             }
-
-            console.log("Progressbar Updated", gesamtFortschritt, this.title);
         }
     }
 

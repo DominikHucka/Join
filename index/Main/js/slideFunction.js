@@ -37,6 +37,7 @@ function openSuccessOverlayTask() {
 function closeSuccessOverlay() {
     document.getElementById('overlaySuccess').classList.remove('show-success-overlay');
 }
+
 function closeSuccessOverlayTask() {
     document.getElementById('overlaySuccessTask').classList.remove('show-success-overlay');
 }
@@ -49,10 +50,18 @@ function closePopUpTaskCard() {
     document.getElementById('addTask').classList.remove('showPopUpTaskCard');
 }
 
-function openHeadMenu() {
-    document.getElementById('logoutWindow').classList.add("show-popupAccount");
+function openHeadMenu(logOutWindow) {
+    logOutWindow.classList.add("show-popupAccount");
 }
 
 function closeHeadMenu(logoutWindow) {
     logoutWindow.classList.remove("show-popupAccount");
+}
+
+function openSuccessCreateAccountOverlay() {
+    document.getElementById('overlaySuccessCreateAccount').classList.add('show-success-overlay');
+}
+
+function closeSuccessCreateAccountOverlay() {
+    document.getElementById('overlaySuccessCreateAccount').classList.remove('show-success-overlay');
 }

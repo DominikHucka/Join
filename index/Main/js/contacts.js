@@ -2,14 +2,14 @@ const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ".split(""); // durch das spli
 /**
  * Render contacts and organize them alphabetically with sections.
  */
-function renderContacts() {
-    let contactsList = "";
+async function renderContacts(obt) {
+    await loadAccounts();
+    let contactsList = document.getElementById("contactsList").innerHTML;
+    contactsList = ""
     let currentInitials = "";
-
     for (let i = 0; i < Join.accounts.length; i++) {
         const contact = Join.accounts[i];
         const userInitials = contact.shortname;
-
         if (userInitials[0] !== currentInitials) {
             if (alphabet.includes(userInitials[0])) {
                 contactsList = handleAlphabetChange(contactsList, userInitials[0]);
@@ -20,6 +20,9 @@ function renderContacts() {
     }
     closeAlphabetSection(contactsList);
     document.getElementById("contactsList").innerHTML = contactsList;
+    if (obt || obt === 0) {
+        showDetails(obt);
+    }
 }
 
 /**
@@ -36,7 +39,6 @@ function handleAlphabetChange(contactsList, initial) {
     contactsList += '<div class="contacts-container">';
     return contactsList;
 }
-
 /**
  * Closes the current alphabet section.
  * @param {string} contactsList - The current contacts list HTML.
@@ -46,9 +48,6 @@ function closeAlphabetSection(contactsList) {
         contactsList += "</div>";
     }
 }
-
-
-
 /**
  * This function renders the user's detailed data
  * 
@@ -56,9 +55,17 @@ function closeAlphabetSection(contactsList) {
  * @returns 
  */
 function showDetails(i) {
+    neutralizeContactColor();
+    highlightContactColor(i);
+
     setTimeout(() => {
         openContactDetails();
     }, 200);
+    manipulateResponsive(i);
+}
+
+
+function manipulateResponsive(i) {
     let contact = Join.accounts[i];
 
     if (window.innerWidth >= 1188) {
@@ -73,6 +80,23 @@ function showDetails(i) {
     }
 }
 
+
+function neutralizeContactColor() {
+    for (let j = 0; j < Join.accounts.length; j++) {
+        let contactField = document.getElementById(`contactField${j}`);
+        let contactName = document.getElementById(`contactName${j}`);
+        contactField.style.background = "white";
+        contactName.style.color = "black";
+    }
+}
+
+
+function highlightContactColor(i) {
+    let contactField = document.getElementById(`contactField${i}`);
+    let contactName = document.getElementById(`contactName${i}`);
+    contactField.style.background = "#2A3647";
+    contactName.style.color = "white";
+}
 /**
  * function for open and render the overlay to add new contact, edit Contact and delete Contact
  * 
@@ -86,6 +110,7 @@ function openAddContact() {
     addContactForm.innerHTML = JoinContacts.generateHtmlAddContact();
 }
 
+
 function openEditContact(i) {
     let contact = Join.accounts[i];
     setTimeout(() => {
@@ -94,20 +119,15 @@ function openEditContact(i) {
     let editContactsContent = contact.generateHtmlEditContact(i);
     document.getElementById("overlay").innerHTML = editContactsContent;
 }
-
 /**
  *  function for close the overlays
  */
-async function closeOverlay() {
-    document.getElementById('overlay');
-    document.getElementById('responOverlay');
+function closeOverlay() {
     setTimeout(() => {
-        closeBigOverlay()
-        closeResOverlay()
+        closeBigOverlay();
+        closeResOverlay();
     }, 100);
-    await contactsPage();
 }
-
 /**
  * function for a new contact to the accounts[] array
  */
@@ -115,7 +135,7 @@ async function addContact() {
     try {
         await loadAccounts()
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
     let name = document.getElementById('name').value;
     let email = document.getElementById('mail').value;
@@ -123,7 +143,7 @@ async function addContact() {
     let newUser = new Contact(name, email, phone)
     Join.accounts.push(newUser);
     Join.accounts.sort((a, b) => a.name.localeCompare(b.name));
-    await closeOverlay();
+    closeOverlay();
     setTimeout(() => {
         successOverlay();
     }, 100);
@@ -137,20 +157,26 @@ async function addContact() {
  * @param {string} i variable for the data in the accounts[] array
  */
 async function editContact(i) {
+    try {
+        await loadAccounts()
+    } catch (error) {
+        console.error("Kann account nicht laden")
+    }
     let contact = Join.accounts[i];
     contact.name = document.getElementById('editName').value;
     contact.email = document.getElementById('editMail').value;
     contact.tel = document.getElementById('editPhone').value;
 
     Join.accounts.sort((a, b) => a.name.localeCompare(b.name));
-    await closeOverlay();
-    closeContactDetails();
+    neutralizeContactColor();
+    closeOverlay();
+
     setTimeout(() => {
         editOverlay();
     }, 100);
     try { await saveAccounts() } catch (e) { "Die Änderungen an join.accounts konnte nicht gespeichert werden: " + e } finally {
-        renderContacts();
-        console.log("Funktioniert", contact);
+        renderContacts(i);
+        showDetails(i);
     }
 }
 
@@ -158,20 +184,15 @@ async function editContact(i) {
  * Function for a delete contact to the accounts[] array
  * @param {string} i variable for the data in the accounts[] array
  */
-async function deleteContact(i) {
+function deleteContact(i) {
     Join.accounts.splice(i, 1);
-    console.log(Join.accounts[i]);
-
-    await closeOverlay();
+    deleteOverlay();
     closeContactDetails();
-    setTimeout(() => {
-        deleteOverlay();
-    }, 100);
-    try { await saveAccounts() } catch (e) { "Die Änderungen an join.accounts konnte nicht gespeichert werden: " + e } finally {
-        renderContacts();
+    closeOverlay();
+    try { saveAccounts() } catch (e) { "Die Änderungen an join.accounts konnte nicht gespeichert werden: " + e } finally {
+        contactsPage();
     }
 }
-
 /**
  *  function for render a little information overlay to addContact, editContact and deleteContact
  * 
@@ -185,6 +206,7 @@ function successOverlay() {
     }, 2000);
 }
 
+
 function deleteOverlay() {
     let overlayDelete = document.getElementById('overlaySuccess');
     overlayDelete.innerHTML = JoinContacts.generateHtmlDeleteInfo();
@@ -194,6 +216,7 @@ function deleteOverlay() {
     }, 2000);
 }
 
+
 function editOverlay() {
     let overlayEdit = document.getElementById('overlaySuccess');
     overlayEdit.innerHTML = JoinContacts.generateHtmlEditInfo();
@@ -202,18 +225,17 @@ function editOverlay() {
         closeSuccessOverlay();
     }, 2000);
 }
-
 /**
  * Function for defining which characters are allowed in the input.
  * @param {string} phoneInput 
  */
 function validatePhoneNumber(phoneInput) {
-    // Entferne alle Zeichen, die keine Zahlen sind, aus dem Eingabewert.
     phoneInput.value = phoneInput.value.replace(/[^0-9+ ]/g, '');
 }
 
+
 function openContactMenu(event) {
-    event.stopPropagation(); // Verhindert, dass das Klick-Ereignis bis zum Dokument weitergeleitet wird
+    event.stopPropagation();
     let optionsMenu = document.getElementById("optionsMenu");
     setTimeout(() => {
         optionsMenu.classList.add("show-options-menu");
@@ -225,25 +247,5 @@ function closeContactMenu(event) {
     let optionsMenu = document.getElementById("optionsMenu");
     if (optionsMenu != undefined && !optionsMenu.contains(event.target)) {
         optionsMenu.classList.remove("show-options-menu");
-    }
-}
-
-
-
-/**
- *  this function is required to render the header and sidebar
- */
-async function includeHTML() {
-    let includeElements = document.querySelectorAll("[w3-include-html]"); //  Wir rufen unseren DIV im Index auf
-    for (let i = 0; i < includeElements.length; i++) {
-        // hier iterieren wir alles Obejekte in diesem DIV container sprich alles was in dem Fall im Header Bereich ist
-        const element = includeElements[i];
-        file = element.getAttribute("w3-include-html"); // hier liest er den Wert im Index.Html "includes/header.html" aus. Und wir deieser Varibale file zugeordnet
-        let resp = await fetch(file); // hier laden wir die datei mit fetch
-        if (resp.ok) {
-            element.innerHTML = await resp.text(); // hier haben wir jetzt alles in der Variable contetn als Text gespeichert^
-        } else {
-            element.innerHTML = "Page not found";
-        }
     }
 }

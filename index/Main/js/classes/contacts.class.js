@@ -6,18 +6,17 @@
  */
 class Contact {
     constructor(name, email, tel = "+49 1111 111 11 1") {
-        this.name = name;
-        this.email = email;
-        this.tel = tel;
-        this.shortname = this.getInitials()
-        this.checked = false;
-        this.color = this.getColor()
-    }
-
-    /**
-     * This function creates and random the bg-color of the initials container
-     * @returns 
-     */
+            this.name = name;
+            this.email = email;
+            this.tel = tel;
+            this.shortname = this.getInitials()
+            this.checked = false;
+            this.color = this.getColor()
+        }
+        /**
+         * This function creates and random the bg-color of the initials container
+         * @returns 
+         */
     getColor() {
         const colors = [
             "#FF7A00",
@@ -51,11 +50,18 @@ class Contact {
     getInitials() {
         let parts = this.name.split(" ");
         let initials = parts[0][0];
-        if (parts.length > 1) {
-            initials += parts[parts.length - 1][0];
+        if (parts.length > 1 && parts[1]) { // Überprüft, ob es einen zweiten Namensteil gibt
+            initials += parts[1][0];
         }
         return initials.toUpperCase();
     }
+    //     let parts = this.name.split(" ");
+    //     let initials = parts[0][0];
+    //     if (parts.length > 1) {
+    //         initials += parts[parts.length - 1][0];
+    //     }
+    //     return initials.toUpperCase();
+    // }
 
     generateHtmlContactDetails(i) {
         return /*html*/ `
@@ -75,9 +81,9 @@ class Contact {
             </div>
             <div class="contactInformation">
                 <h3 class="font-size-normal mg-none">Contact Information</h3>
-                <h3 class="mail-headline">Email</h3><br>
+                <h3 class="mail-headline">Email</h3>
                 <p class="mail mg-none"><a href="mailTo:${this.email}">${this.email}</a></p>
-                <h3>Phone</h3>
+                <h3 class="mail-headline">Phone</h3>
                 <p><a class="phone-link" href="tel:${this.tel}">${this.tel}</a></p>
             </div>
         `
@@ -112,7 +118,7 @@ class Contact {
             <div class="contactInformation">
                 <h3 class="mail-headline">Email</h3><br>
                 <p class="mail mg-none"><a href="mailTo:${this.email}">${this.email}</a></p>
-                <h3>Phone</h3>
+                <h3 class="mail-headline">Phone</h3>
                 <p><a class="phone-link" href="tel:${this.tel}">${this.tel}</a></p>
             </div>
             <div class="options-btn-div">
@@ -135,7 +141,7 @@ class Contact {
 
     tinyCard(x) {
         return /*html*/ `
-        <div class="tinyAccountTaskCard" onclick="showContact(${x})">
+        <div class="tinyAccountTaskCard">
             <div class="initials-logo" style="background-color: ${this.color}">${this.shortname}</div>
             <div>
                 <div class="contactName">${this.name}</div>
@@ -146,10 +152,10 @@ class Contact {
     generateHtmlContactList(i) {
         return /*html*/ `
             <div class="contactfield-wrapper">
-                <div class="contactfield" onclick="showDetails(${i})">
+                <div id="contactField${i}" class="contactfield" onclick="showDetails(${i})">
                     <div class="initials-logo" style="background-color: ${this.color}">${this.shortname}</div>
                     <div class="contact">
-                        <span class="name">${this.name}</span>
+                        <span id="contactName${i}" class="name">${this.name}</span>
                         <span class="mail">${this.email}</span>
                     </div>
                 </div>
@@ -185,7 +191,7 @@ class Contact {
     }
     generateHTMLChecked(x) {
         return /*html*/ `
-            <div onclick="removeShortNames(${x})" id="tinyAccountCardChecked${x}" class="checked d-none">
+            <div id="tinyAccountCardChecked${x}" class="checked d-none">
                 <div onclick="assignedCheck(${x})"  class="tinyAccountCardChecked" id="ac${x}">
                     <div class="board-addtask-addcontact-contact">
                         <div class="initials-logo" style="background-color: ${this.color}">${this.shortname}</div>
@@ -198,10 +204,9 @@ class Contact {
             </div>
         `
     }
-    accountTag(x) {
+    accountTag() {
         return /*html*/ `
-            <div id="removeShortName${x}" class="initials-logo accountTag" style="background-color: ${this.color}">${this.shortname}</div>
-
+            <div  class="initials-logo accountTag" style="background-color: ${this.color}">${this.shortname}</div>
         `
     }
     generateHtmlEditContact(i) {
@@ -213,8 +218,7 @@ class Contact {
             </div>
             <div class="overlay-right-container-addContact">
                 <div class="close-button">${JoinContacts.closeButton()}</div>
-
-                <form class="addContact-form" onsubmit="editContact(${i}); return false;">
+                <form class="addContact-form" onsubmit="editContact(${i}); return false">
                     <div class="btn-underlay">
                         <input id="editName" required type="text" class="frame-157" placeholder="Name" value="${this.name}">
                         <img class="input-icon" src="./IMG/person.png"> 
@@ -234,7 +238,6 @@ class Contact {
                         </div>
                     </div>
                 </form>
-
             </div>
         </div>
         `

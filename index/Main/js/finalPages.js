@@ -16,18 +16,59 @@ function setActiveStyles(id, backgroundColor, textColor) {
 }
 /**
  * Initiates the page by loading accounts and tasks, starting animation, and attempting to retrieve stored JSON data.
+ * If you already been on Join, the startPage() redirects you to you former location.
+ * It stablises the History api in case of reloading. 
  */
 async function startPage() {
+    try { await loadAccounts().then(await loadTasks()); } catch (e) { console.error("Fehler", e) }
+    let responseLocal = loadSignedUser();
+    Join.signedAccount = responseLocal;
+    let myState = localStorage.getItem('state')
+    setState("LogIn")
+
+    redirectUser(myState)
     try {
-        await loadAccounts()
-        await loadTasks()
-    } catch (e) {
-        console.log("Fehler", e)
-    } finally {
+        retrievesAStoredJSON();
+    } catch (e) { "Nothing to remember :" + e }
+}
+
+
+function redirectUser(myState) {
+    if (Join.signedAccount !== null) {
+        redirectSignedUser(myState)
+    } else {
+
+        redirectUnsignedUser(myState)
+    }
+}
+
+
+function redirectUnsignedUser(myState) {
+    if (myState === "SignUp") {
+        signUp();
+    } else if (myState === "LogIn") {
         startAnimation();
-        try {
-            retrievesAStoredJSON();
-        } catch (e) { "Nothing to remember :" + e }
+    } else {
+        startAnimation();
+    }
+}
+
+
+function redirectSignedUser(myState) {
+    if (myState === "Summary") {
+        summeryPage()
+    } else if (myState === "Board") {
+        boardPage()
+    } else if (myState === "AddTask") {
+        addTaskPage()
+    } else if (myState === "Contacts") {
+        contactsPage()
+    } else if (myState === "Privacy Policy") {
+        privacyPage()
+    } else if (myState === "LegalNotice") {
+        legalPage()
+    } else if (myState === "Help") {
+        helpPage()
     }
 }
 /**
@@ -36,7 +77,7 @@ async function startPage() {
  * @param {HTMLElement} body - The HTML body element.
  */
 function startAnimation() {
-    setState("login")
+    setState("LogIn")
     body.innerHTML = JoinLogin.startAnimationOverlay();
     body.innerHTML = JoinLogin.startAnimation();
     body.innerHTML += JoinLogin.logInContent();
@@ -55,9 +96,9 @@ function retrievesAStoredJSON() {
 /**
  * Initiates the second version of the page by loading accounts, displaying the logo, and rendering login content.
  */
-async function startPage2() {
-    try { await loadAccounts() } catch (e) {
-        console.log("Fehler", e)
+function startPage2() {
+    try { loadAccounts() } catch (e) {
+        console.error("Fehler", e)
     } finally {
         body.innerHTML = JoinLogin.logoLogin();
         body.innerHTML += JoinLogin.logInContent();
@@ -69,16 +110,17 @@ async function startPage2() {
  * @param {HTMLElement} body - The HTML body element.
  */
 function signUp() {
-    setState("signup");
+    setState("SignUp");
+    policyCheck = false;
     body.innerHTML = JoinLogin.logoLogin();
     body.innerHTML = JoinLogin.signUpWindow();
 }
 /**
  * Initiates the summary page by loading tasks and components for the summary.
  */
-async function summeryPage() {
-    try { await loadTasks() } catch (e) {
-        console.log("Fehler", e)
+function summeryPage() {
+    try { loadTasks() } catch (e) {
+        console.error("Fehler", e)
     } finally {
         loadComponentsSummery();
     }
@@ -92,13 +134,13 @@ async function summeryPage() {
  * @param {function} setActiveStyles - Function to set active styles for specified elements.
  */
 function loadComponentsSummery() {
-    setState("summary");
+    setState("Summary");
     cleanUpAll()
     body.innerHTML = "";
     body.innerHTML = JoinLogin.pageLayoutMain();
     let content = document.getElementById('content');
-    showSideAndHead();
     content.innerHTML = JoinSummary.summeryContent();
+    showSideAndHead();
     setActiveStyles('summeryActive', 'rgba(9, 25, 49, 1)');
     setActiveStyles('responActiveSummery', 'rgba(9, 25, 49, 1)');
 }
@@ -107,7 +149,7 @@ function loadComponentsSummery() {
  */
 async function boardPage() {
     try { await loadTasks() } catch (e) {
-        console.log("Fehler", e)
+        console.error("Fehler", e)
     } finally {
         loadComponentsBoard();
     }
@@ -137,9 +179,9 @@ function loadComponentsBoard() {
 /**
  * Initiates the contacts page by loading accounts and components for contacts.
  */
-async function contactsPage() {
-    try { await loadAccounts() } catch (e) {
-        console.log("Fehler", e)
+function contactsPage() {
+    try { loadAccounts() } catch (e) {
+        console.error("Fehler", e)
     } finally {
         loadComponentsContacts();
     }
@@ -173,7 +215,7 @@ function loadComponentsContacts() {
  * @param {function} showSideAndHead - Function to display side and head components.
  */
 function helpPage() {
-    setState("help");
+    setState("Help");
     cleanUpAll();
     body.innerHTML = "";
     body.innerHTML = Join.pageLayoutMain();
@@ -205,7 +247,7 @@ function privacyPage() {
  * @param {function} setActiveStyles - Function to set active styles for specified elements.
  */
 function legalPage() {
-    setState("Legal")
+    setState("LegalNotice")
     body.innerHTML = "";
     body.innerHTML = Join.pageLayoutMain();
     let content = document.getElementById('content');
@@ -223,26 +265,13 @@ function legalPage() {
  * @param {function} changeCSSProperty - Function to change CSS properties.
  */
 function addTaskPage() {
-    setState("addTask");
+    setState("AddTask");
     cleanUpAll()
     body.innerHTML = "";
     body.innerHTML = Join.pageLayoutMain()
     let content = document.getElementById('content')
-    content.innerHTML = JoinBoard.generateHTMLaddTaskWindow();
+    content.innerHTML = JoinBoard.generateHTMLaddTaskWindowForm(4);
     showSideAndHead()
     setActiveStyles('addTaskActive', 'rgba(9, 25, 49, 1)');
     setActiveStyles('responActiveAddTask', 'rgba(9, 25, 49, 1)');
-    changeCSSProperty();
 }
-/**
- * Changes CSS properties for elements related to adding tasks.
- */
-function changeCSSProperty() {
-    document.getElementById('containerShortName').style.position = 'absolute';
-    document.getElementById('containerShortName').style.bottom = '200px';
-    document.getElementById('styleAddTask').style.marginBottom = '180px';
-    document.getElementById('addtaskButton').style.position = 'absolute';
-    document.getElementById('addtaskButton').style.left = '935px';
-    document.getElementById('addtaskButton').style.bottom = '35px';
-}
-

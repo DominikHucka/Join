@@ -24,7 +24,23 @@ a:hover {
     cursor: pointer;
     transition: 100ms ease-in-out;
 }
-
+.redFrame{
+    border-color: #ff4646!important;
+}
+.passwordAndLabel{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+.falsePasswordRed{
+    color: #ff4646 !important;
+}
+.falsePassword{
+    color: white;
+    font-size: 16px;
+    margin-top: 0.3em;
+    
+}
 .log-in-side-button {
     border: none;
     width: 91px !important;
@@ -69,6 +85,7 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    /* flex-direction: column; */
     width: 100%;
     height: 100vh;
 }

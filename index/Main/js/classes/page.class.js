@@ -6,7 +6,6 @@ class Page {
             this.tasks = [];
         }
         // Methoden
-
     sayDaytime() {
         const currentHour = new Date().getHours();
         let greeting = "";
@@ -28,13 +27,14 @@ class Page {
         return /*html*/ `
             <div id="SideAndHead"></div>
             <div id="content" class="content"></div>
+            ${this.showFooter()}
         `
     }
     SideAndHead() {
         let nav = () => {
             if (Join.signedAccount) {
                 return /*html*/ `
-                    <div id="summeryActive" class="navs bgDark " onclick="summeryPage()"><div class="summary"></div><h3>Summery</h3></div>
+                    <div id="summeryActive" class="navs bgDark " onclick="summeryPage()"><div class="summary"></div><h3>Summary</h3></div>
                     <div id="addTaskActive" class="navs" onclick="addTaskPage()"><div class="addTask"></div><h3>Add Task</h3></div>
                     <div id="boardActive" class="navs" onclick="boardPage()"><div class="board"></div><h3>Board</h3></div>
                     <div id="contactsActive" class="navs" onclick="contactsPage()"><div class="contacts"></div><h3>Contacts</h3></div>
@@ -61,11 +61,11 @@ class Page {
                     ${nav()}
                 </nav>
                 <div class="container-privacy-legal">
-                    <div id="privacy" class="style-privacy">
-                        <p id="privacyPage" class="legal-policy" onclick="privacyPage('privacyPage')">Privacy Policy</p>
+                    <div id="privacy" class="style-privacy" onclick="privacyPage('privacyPage')">
+                        <p id="privacyPage" class="legal-policy">Privacy Policy</p>
                     </div>
-                    <div id="legal" class="style-legal">
-                        <p id="legalPage" class="legal-policy" onclick="legalPage('legalPage')">Legal notice</p>
+                    <div id="legal" class="style-legal" onclick="legalPage('legalPage')">
+                        <p id="legalPage" class="legal-policy">Legal notice</p>
                     </div>
                 </div>
             </div>
@@ -82,10 +82,27 @@ class Page {
                     ${accountArea()}
                 </div>
             </header>
+            
+            ${this.logoutWindow()}
+
+        `
+    }
+    logoutWindow() {
+        return /*html*/ `
+            <div id="logoutWindow" class="popupAccount d-none">
+                <div class="popupAccountBtn" onclick="legalPage()"><p>Legal Notice</p></div>
+                <div class="popupAccountBtn" onclick="privacyPage()"><p>Privacy Policy</p></div>
+                <div class="popupAccountBtn" onclick="logout()"><p>Log out</p></div>
+            </div>
+
+        `
+    }
+    showFooter() {
+        return /*html*/ `
             <footer class="respon-footer">
                 <div id="responActiveSummery" class="respon-footer-buttons" onclick="summeryPage()">
                     <img src="./IMG/Summary.png">
-                    <p class="mg-none">Summery</p>
+                    <p class="mg-none">Summary</p>
                 </div>
                 <div id="responActiveBoard" class="respon-footer-buttons" onclick="boardPage()">
                     <img src="./IMG/Board.png">
@@ -100,17 +117,6 @@ class Page {
                     <p class="mg-none">Contacts</p>
                 </div>
             </footer>
-            ${this.logoutWindow()}
-        `
-    }
-    logoutWindow() {
-        return /*html*/ `
-            <div id="logoutWindow" class="popupAccount">
-                <div class="popupAccountBtn" onclick="legalPage()"><p>Legal Notice</p></div>
-                <div class="popupAccountBtn" onclick="privacyPage()"><p>Privacy Policy</p></div>
-                <div class="popupAccountBtn" onclick="logout()"><p>Log out</p></div>
-            </div>
-
         `
     }
 }

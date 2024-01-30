@@ -1,4 +1,6 @@
 let currentDraggedElement;
+let isMoving = false;
+let lastTouchStartTime = 0;
 /**
  * Hides an HTML element by adding 'd-none' class.
  * @param {string} id - The ID of the element to hide.
@@ -219,10 +221,9 @@ async function moveTo(category) {
         else if (category === "Done") {
             moveToDone(currentDraggedElement);
         }
+        await saveTasks();
+        JoinBoard.renderTask();
     }
-    try { await saveTasks() } catch (e) {
-        console.log("Fehler", e)}
-    JoinBoard.renderTask();
 }
 /**
  * Moves the task to the 'Todo' category.
@@ -331,7 +332,4 @@ function checkAreaDone(container) {
         show('emptyTaskDone');
     }
 }
-
-
-
 
