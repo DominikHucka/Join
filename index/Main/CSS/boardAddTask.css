@@ -449,7 +449,7 @@
     align-items: center;
     align-self: stretch;
     background: #FFF;
-    width: 90%;
+    /* width: 90%; */
 }
 
 .board-input-date input[type="date"] {
